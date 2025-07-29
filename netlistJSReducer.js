@@ -84,7 +84,8 @@ let netlist = {
 	count: 0,
 	line: [],
 	node: [],
-	merged: []
+	merged: [],
+	output: ""
 };
 
 let parallel = {
@@ -128,6 +129,15 @@ const netlistJSReducer = {
 
 		// update sys status		
 		sys.stat = sys.stat << 1;
+	},
+	
+	makingNetlistFromArray: () => {
+		let netlistToString = [];
+		for (const line of netlist.line) {
+			netlistToString.push(line.flat());
+		}
+		netlist.output = netlistToString.join("\n");
+		
 	},
 	
 	
@@ -310,6 +320,6 @@ netlistJSReducer.changeParallelItems();
 netlistJSReducer.searchSeriesItems();
 netlistJSReducer.changeSeriesItems();
 
-
+netlistJSReducer.makingNetlistFromArray();
 	
 console.log(netlist.line)
