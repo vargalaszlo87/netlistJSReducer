@@ -49,6 +49,13 @@ let parallel = {
 	bool: false
 };
 
+let series = {
+	count: 0,
+	name: [],
+	id: [],
+	bool: false
+}
+
 	
 const allowedParts = [
 	'R','L','C'
@@ -73,7 +80,7 @@ const netlistJSReducer = {
 	searchParallelItems: () => {
 		const groupMap = new Map();
 		
-		// separate params
+		// build nodes
 		for (let i = 0; i < netlist.count; i++) {
 			const [name, node1, node2] = netlist.line[i];
 			const key = [node1, node2].sort().join("|");
@@ -139,16 +146,55 @@ const netlistJSReducer = {
 		
 		// update sys status
 		sys.stat = sys.stat << 1;	
-	}				
+	},
+
+	searchSeriesItems: () => {
+		const nodeMap = new Map();
+
+		// build nodes
+		for (let i = 0; i < netlist.count; i++) {
+			const [name, node1, node2] = netlist.line[i];
+
+			for (const node of [node1, node2]) {
+				if (!nodeMap.has(node)) {
+					nodeMap.set(node, []);
+				}
+				nodeMap.get(node).push({ name, index: i });
+			}
+		}
+
+		// parallel lists to null
+		series.count = 0;
+		series.name = [];
+		series.id = [];
+		series.bool = false;
+
+		// find the nodes that only connect two nodes.
+		for (const [node, group] of nodeMap.entries()) {
+			if (["0", "port1", "port2"].includes(node)) continue;
+
+			if (group.length === 2) {
+				series.name.push(group.map(g => g.name));
+				series.id.push(group.map(g => g.index));
+				series.count++;
+				series.bool = true;
+			}
+		}
+
+		// 4. státuszjelző frissítése
+		sys.stat = sys.stat << 1;
+	}
+	
 };
 
 	
 netlistJSReducer.fillingNetlistArray(rawNetlist);
 netlistJSReducer.searchParallelItems();
 netlistJSReducer.changeParallelItems();
+netlistJSReducer.searchSeriesItems();
 
 
 	
 console.log(netlist.line)
 
-console.log(netlist.merged);
+console.log(series.id);
