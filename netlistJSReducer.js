@@ -131,6 +131,11 @@ const netlistJSReducer = {
 		sys.stat = sys.stat << 1;
 	},
 	
+	
+	/*!
+	 * maging a netlist from array
+	 */	
+	
 	makingNetlistFromArray: () => {
 		let netlistToString = [];
 		for (const line of netlist.line) {
@@ -139,7 +144,36 @@ const netlistJSReducer = {
 		netlist.output = netlistToString.join("\n");
 		
 	},
+
+
+	/*!
+	 * converting the prefix to multiplier
+	 */
 	
+	prefixumConverter: (prefix) => {
+		const siTable = {
+			'y': 1e-24,
+			'z': 1e-21,
+			'a': 1e-18,
+			'f': 1e-15,
+			'p': 1e-12,
+			'n': 1e-9,
+			'u': 1e-6,  	 
+			'µ': 1e-6,   // same as u
+			'm': 1e-3,
+			'': 1,
+			'k': 1e3,
+			'M': 1e6,
+			'G': 1e9,
+			'T': 1e12,
+			'P': 1e15,
+			'E': 1e18,
+			'Z': 1e21,
+			'Y': 1e24
+		};
+		
+		return siTable[prefix] ?? null; 
+	},
 	
 	/*!
 	 * searching the parallel items in circuit
