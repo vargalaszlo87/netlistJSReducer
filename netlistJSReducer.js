@@ -133,7 +133,7 @@ const netlistJSReducer = {
 
 		}
 			
-		// delete paralleled itesm
+		// delete paralleled items
 		let flatArray = parallel.id.flat();
 		removeIndexes(netlist.line, flatArray);
 		removeIndexes(netlist.node, flatArray);
@@ -181,20 +181,67 @@ const netlistJSReducer = {
 			}
 		}
 
-		// 4. státuszjelző frissítése
+		// update sys status
 		sys.stat = sys.stat << 1;
-	}
+	},
+	
+	
+	
+	
+	changeSeriesItems: () => { 
+		for (const i of series.id) {
+			
+			// temp variables for new item
+			let tempName = new Array();
+			let tempValue = new Array();
+			let tempNodes = new Array();
+
+			// build series names
+			for (const j of i) {
+				if (netlist.line[j]) {
+					tempName.push(netlist.line[j][0]);
+					tempValue.push(netlist.line[j][3]);
+					tempNodes.push([netlist.line[j][1], netlist.line[j][2]]);
+				}
+			}
+			
+			// add new item
+			netlist.line.push([tempName.join("+"), tempNodes[0][0], tempNodes[0][1], tempValue.join("|")]);
+			netlist.node.push([tempNodes[0][0], tempNodes[0][1]]);
+			netlist.count++;
+
+		}
+			
+		// delete series items
+		let flatArray = series.id.flat();
+		removeIndexes(netlist.line, flatArray);
+		removeIndexes(netlist.node, flatArray);
+		netlist.count -= flatArray.length;
+		
+		// add to merged array		
+		for (let i = 0; i < series.id.length; i++) {
+		  netlist.merged.push(netlist.line.length - 1 - i);
+		}
+		
+		// update sys status
+		sys.stat = sys.stat << 1;	
+	},	
+	
+	
+	
+	
 	
 };
 
+
+// try it out
 	
 netlistJSReducer.fillingNetlistArray(rawNetlist);
 netlistJSReducer.searchParallelItems();
 netlistJSReducer.changeParallelItems();
 netlistJSReducer.searchSeriesItems();
+netlistJSReducer.changeSeriesItems();
 
 
 	
 console.log(netlist.line)
-
-console.log(series.id);
