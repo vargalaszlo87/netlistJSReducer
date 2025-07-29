@@ -16,6 +16,7 @@ C4 0 port2 220p
 C5 N001 N002 10p
 L1 port1 N001 270n
 L2 N001 N002 270n
+R1 N001 N002 720
 C6 port2 port1 1p
 C7 N002 port2 10p
 `.trim();
@@ -53,51 +54,34 @@ const netlistJSReducer = {
 	},
 	
 	searchParallelItems: () => {
-		// serach the paralell
+		const groupMap = new Map();
+
 		for (let i = 0; i < netlist.count; i++) {
-			for (let j = 0; j < netlist.count; j++) {
-				// equal items
-				if (i == j)
-					continue;
-				
-				// is equal?
-				const a = new Set(netlist.node[i]);
-				const b = new Set(netlist.node[j]);	
-				if (eqSet(a,b)) {
-				
-					// checking variables
-					parallel.bool = false;
-					t = new Array();
-					
-					// exist in "isParallel" array?
-					for (let x = 0; x < parallel.count; x++) {
-						const temp = new Set (parallel.name[x]);
-						
-						t.push(netlist.line[i][0]);
-						t.push(netlist.line[j][0]);
+			const [name, node1, node2] = netlist.line[i];
+			const key = [node1, node2].sort().join("|");
 
-						if (eqSet(new Set (t, j), temp))
-							parallel.bool = true;
-					
-					}
-					
-					// if it's not on the list
-					if (!parallel.bool) {
-						parallel.name[parallel.count] = [netlist.line[i][0], netlist.line[j][0]];
-						parallel.id[parallel.count] = [i, j];
-						parallel.count++;			
-					}
-
-				}
-				else
-					continue;
+			if (!groupMap.has(key)) {
+				groupMap.set(key, []);
 			}
-		}	
+
+			groupMap.get(key).push({ name, index: i });
+		}
+
+		// Reset parallel listák
+		parallel.count = 0;
+		parallel.name = [];
+		parallel.id = [];
+
+		for (const [key, group] of groupMap.entries()) {
+			if (group.length > 1) {
+				parallel.name.push(group.map(g => g.name));
+				parallel.id.push(group.map(g => g.index));
+				parallel.count++;
+			}
+		}
+	},
 		
-	
-	}
 };
-	
 	
 netlistJSReducer.fillingNetlistArray(rawNetlist);
 netlistJSReducer.searchParallelItems();
