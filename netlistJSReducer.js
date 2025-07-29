@@ -1,6 +1,63 @@
-  
-// aux functions
+/*!
+ * @project netlistJSReducer  v.0.1	
+ * @file netlistJSReducer.js
+ * @brief This is the file of main methods.
+ *
+ * Version information:
+ *
+ * N/A
+ *
+ * Features:
+ * - searching series/parallel items
+ * - merging series/parallel items
+ *
+ * @author Varga Laszlo
+ *
+ * @website https://github.com/vargalaszlo87/netlistJSReducer
+ * @website http://vargalaszlo.com
+ * @website http://ha1cx.hu
+ *
+ * @date 2025-07-29
+ *
+ * @license
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+ 
+ 
+/*!
+ * sample netlist
+ */
+ 
+const rawNetlist = `
+C1 port1 0 47p
+C2 N001 0 220p
+C3 N001 port1 47p
+C4 0 port2 220p
+C5 N001 N002 10p
+L1 port1 N001 270n
+L2 N001 N002 270n
+R1 N001 N002 720
+C6 port2 port1 1p
+C7 N002 port2 10p
+`.trim();
 
+  
+/*!
+ * aux functions
+ */
+ 
 const eqSet = (xs, ys) =>
     xs.size === ys.size &&
     [...xs].every((x) => ys.has(x));
@@ -15,21 +72,9 @@ function removeIndexes(array, indexes) {
   return array;
 }
 
-// variables	
-
-// dev 
-const rawNetlist = `
-C1 port1 0 47p
-C2 N001 0 220p
-C3 N001 port1 47p
-C4 0 port2 220p
-C5 N001 N002 10p
-L1 port1 N001 270n
-L2 N001 N002 270n
-R1 N001 N002 720
-C6 port2 port1 1p
-C7 N002 port2 10p
-`.trim();
+/*!
+ * Variables
+ */	
 
 let sys = {
 	stat: 1
@@ -56,12 +101,20 @@ let series = {
 	bool: false
 }
 
-	
 const allowedParts = [
 	'R','L','C'
 ];
 
+/*!
+ * netlistJSReducer
+ */
+
 const netlistJSReducer = {
+
+
+	/*!
+	 * filling the netlist array
+	 */
 
 	fillingNetlistArray: (rawData) => {
 		
@@ -76,6 +129,11 @@ const netlistJSReducer = {
 		// update sys status		
 		sys.stat = sys.stat << 1;
 	},
+	
+	
+	/*!
+	 * searching the parallel items in circuit
+	 */	
 	
 	searchParallelItems: () => {
 		const groupMap = new Map();
@@ -108,6 +166,11 @@ const netlistJSReducer = {
 		// update sys status
 		sys.stat = sys.stat << 1;
 	},	
+	
+	
+	/*!
+	 * merging the parallel items in circuit
+	 */		
 				
 	changeParallelItems: () => { 
 		for (const i of parallel.id) {
@@ -148,6 +211,11 @@ const netlistJSReducer = {
 		sys.stat = sys.stat << 1;	
 	},
 
+
+	/*!
+	 * searching the series items in circuit
+	 */	
+
 	searchSeriesItems: () => {
 		const nodeMap = new Map();
 
@@ -186,7 +254,9 @@ const netlistJSReducer = {
 	},
 	
 	
-	
+	/*!
+	 * merging the series items in circuit
+	 */		
 	
 	changeSeriesItems: () => { 
 		for (const i of series.id) {
@@ -228,9 +298,7 @@ const netlistJSReducer = {
 	},	
 	
 	
-	
-	
-	
+
 };
 
 
